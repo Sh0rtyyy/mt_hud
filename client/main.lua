@@ -2,7 +2,11 @@ local Config = lib.load('config')
 local PlayerVoiceMethod = false
 local showingVehicleHUD = false
 local showingPlayerHUD = false
+local hunger = 100
+local thirst = 100
 local showingCompass = false
+
+ESX = exports["es_extended"]:getSharedObject()
 
 RegisterNuiCallback('hideFrame', function(data, cb)
     ShowNUI(data.name, false, false)
@@ -98,19 +102,20 @@ end
 
 CreateThread(function()
     while true do
-        if not IsPauseMenuActive() and LocalPlayer.state.isLoggedIn then
+        if not IsPauseMenuActive() and ESX.IsPlayerLoaded() then
             local stamina = 0
-            local PlayerData = Config.core.Functions.GetPlayerData()
             if not showingPlayerHUD then DisplayRadar(false) ShowNUI('setVisiblePlayer', true, false) showingPlayerHUD = true end
             if not IsEntityInWater(cache.ped) then stamina = (100 - GetPlayerSprintStaminaRemaining(cache.playerId)) end
             if IsEntityInWater(cache.ped) then stamina = ((GetPlayerUnderwaterTimeRemaining(cache.playerId) * 10) - 300) end
+            TriggerEvent('esx_status:getStatus', 'hunger', function(status) hunger = status.getPercent() end)
+            TriggerEvent('esx_status:getStatus', 'thirst', function(status) thirst = status.getPercent() end)
             SendNUI('player', {
                 health = math.ceil(GetEntityHealth(cache.ped) - 100),
                 armor = math.ceil(GetPedArmour(cache.ped)),
-                thirst = math.ceil(PlayerData.metadata.thirst),
-                hunger = math.ceil(PlayerData.metadata.hunger),
+                thirst = math.ceil(thirst),
+                hunger = math.ceil(hunger),
                 oxygen = stamina or 0,
-                voice = LocalPlayer.state.proximity.distance,
+                voice = LocalPlayer.state['proximity'].distance,
                 talking = getPlayerVoiceMethod(cache.playerId),
                 colors = Config.colors,
                 engine = (cache.vehicle and GetIsVehicleEngineRunning(cache.vehicle)) and math.ceil(GetVehicleEngineHealth(cache.vehicle) / 10) or false,
