@@ -16,8 +16,6 @@ end)
 AddEventHandler('onResourceStart', function(resourceName)
     if GetCurrentResourceName() ~= resourceName then return end
     Wait(500)
-    --local hudSettings = GetResourceKvpString('hudSettings')
-    --if hudSettings then loadSettings(json.decode(hudSettings)) end
     startHUD()
 end)
 
@@ -97,14 +95,22 @@ local getPlayerVoiceMethod = function(player)
 end
 
 local getHeadingText = function(heading)
-    if ((heading >= 0 and heading < 45) or (heading >= 315 and heading < 360)) then
-        return "N"
-    elseif (heading >= 45 and heading < 135) then
-        return "W"
-    elseif (heading >= 135 and heading < 225) then
-        return "S"
-    elseif (heading >= 225 and heading < 315) then
-        return "E"
+    if ((heading >= 0 and heading < 30) or (heading >= 330 and heading < 360)) then
+        return 'N'
+    elseif (heading >= 30 and heading < 60) then
+        return 'NW'
+    elseif (heading >= 60 and heading < 120) then
+        return 'W'
+    elseif (heading >= 120 and heading < 160) then
+        return 'SW'
+    elseif (heading >= 160 and heading < 210) then
+        return 'S'
+    elseif (heading >= 210 and heading < 240) then
+        return 'SE'
+    elseif (heading >= 240 and heading < 310) then
+        return 'E'
+    elseif (heading >= 310 and heading < 330) then
+        return 'NE'
     end
 end
 
