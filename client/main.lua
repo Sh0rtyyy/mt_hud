@@ -8,6 +8,27 @@ local showingCompass = false
 
 ESX = exports["es_extended"]:getSharedObject()
 
+RegisterNetEvent("esx:playerLoaded", function()
+    Wait(2000)
+    startHUD()
+end)
+
+AddEventHandler('onResourceStart', function(resourceName)
+    if GetCurrentResourceName() ~= resourceName then return end
+    Wait(500)
+    --local hudSettings = GetResourceKvpString('hudSettings')
+    --if hudSettings then loadSettings(json.decode(hudSettings)) end
+    startHUD()
+end)
+
+function startHUD()
+    local ped = PlayerPedId()
+    if not IsPedInAnyVehicle(ped) then DisplayRadar(false) else DisplayRadar(true) SendNUIMessage({ action = 'showVehicleHUD' }) end
+    TriggerEvent('hud:client:LoadMap')
+    ShowNUI('setVisiblePlayer', true, false)
+    showingPlayerHUD = true
+end
+
 RegisterNuiCallback('hideFrame', function(data, cb)
     ShowNUI(data.name, false, false)
     cb(true)
@@ -110,10 +131,10 @@ CreateThread(function()
             TriggerEvent('esx_status:getStatus', 'hunger', function(status) hunger = status.getPercent() end)
             TriggerEvent('esx_status:getStatus', 'thirst', function(status) thirst = status.getPercent() end)
             SendNUI('player', {
-                health = math.ceil(GetEntityHealth(cache.ped) - 100),
-                armor = math.ceil(GetPedArmour(cache.ped)),
-                thirst = math.ceil(thirst),
-                hunger = math.ceil(hunger),
+                health = (GetEntityHealth(cache.ped) - 100),
+                armor = GetPedArmour(cache.ped),
+                thirst = thirst,
+                hunger = hunger,
                 oxygen = stamina or 0,
                 voice = LocalPlayer.state['proximity'].distance,
                 talking = getPlayerVoiceMethod(cache.playerId),
@@ -128,7 +149,9 @@ CreateThread(function()
                 SendNUI('vehicle', {
                     speed = math.ceil(GetEntitySpeed(cache.vehicle) * (Config.speedType == 'kmh' and 3.6 or 2.23694)),
                     gear = GetVehicleCurrentGear(cache.vehicle),
-                    speedType = Config.speedType
+                    speedType = Config.speedType,
+                    engine = (cache.vehicle and GetIsVehicleEngineRunning(cache.vehicle)) and math.ceil(GetVehicleEngineHealth(cache.vehicle) / 10) or false,
+                    fuel = (cache.vehicle and GetIsVehicleEngineRunning(cache.vehicle)) and math.ceil(GetVehicleFuelLevel(cache.vehicle)) or false,
                 })
                 local crossroads = getCrossroads(cache.vehicle)
                 if not showingCompass then ShowNUI('setVisibleCompass', true, false) showingCompass = true end
